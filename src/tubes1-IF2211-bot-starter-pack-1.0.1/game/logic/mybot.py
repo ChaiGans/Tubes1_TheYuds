@@ -39,9 +39,11 @@ class MyBot(BaseLogic):
                         listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
                 else:
                     listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
-                    
-            minDiamond = min(listJarak, key = lambda x: x[1])
-            self.goal_position = minDiamond[0]
+            try:
+                minDiamond = min(listJarak, key = lambda x: x[1])
+                self.goal_position = minDiamond[0]
+            except:
+                self.goal_position = base
 
         delta_x, delta_y = get_direction(
             currentPos.x,

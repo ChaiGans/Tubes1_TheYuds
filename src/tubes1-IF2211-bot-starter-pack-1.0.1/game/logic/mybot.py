@@ -82,7 +82,7 @@ class MyBot(BaseLogic):
             else:
                 self.goal_position = base
         else:
-            print(board.game_objects)
+            # print(board.game_objects)
             listJarak = []
             for diamond in board.diamonds:
                 print(diamond.position)
@@ -107,18 +107,22 @@ class MyBot(BaseLogic):
                 else:
                     self.goal_position = base
 
-            # if (self.goal_position != initial_portal_position):
-            #     if (self.goal_position.x == initial_portal_position.x):
-            #         if (self.goal_position.y > initial_portal_position.y):
-            #             return 0, 1
-            #         else:
-            #             return 0, -1
-            #     elif (self.goal_position.y == initial_portal_position.y):
-            #         if (self.goal_position.x > initial_portal_position.x):
-            #             return 1, 0
-            #         else:
-            #             return -1, 0
-            
+            if (self.goal_position != initial_portal_position):
+                print("CHECK AVOIDING MOVE")
+                if (self.goal_position.x == initial_portal_position.x):
+                    if (abs(initial_portal_position.y - current_position.y) == 1):
+                        if (current_position.x == 0):
+                            return 1,0
+                        else:
+                            return -1,0
+                    
+                elif (self.goal_position.y == initial_portal_position.y):
+                    if (abs(initial_portal_position.x - current_position.x) == 1):
+                        if (current_position.y == 0):
+                            return 0,1
+                        else:
+                            return 0,-1
+
             if time_rem <= 10000:
                 if(props.diamonds > 1):
                     initial_portal_position, effective_portal_base_displacement = self.portal_to_base_displacement(current_position,first_portal_position, second_portal_position, board_bot)

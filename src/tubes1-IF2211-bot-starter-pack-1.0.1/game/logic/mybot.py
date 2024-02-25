@@ -13,22 +13,50 @@ class MyBot(BaseLogic):
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
         
-    def displacement(self, currentPos: Position, targetPos: Position):
-        return math.sqrt((currentPos.x-targetPos.x)**2 + (currentPos.y-targetPos.y)**2)
+    def displacement(self, current_position: Position, goal_position: Position):
+        return math.sqrt((current_position.x - goal_position.x) ** 2 + (current_position.y - goal_position.y) ** 2)
+    
+    def portal_to_diamond_displacement(self, current_position: Position, portal_one_position: Position, portal_two_position: Position, board: Board):
+        displacement_bot_to_portal_one = self.displacement(current_position, portal_one_position)
+        displacement_bot_to_portal_two = self.displacement(current_position, portal_two_position)
+
+        if displacement_bot_to_portal_one <= displacement_bot_to_portal_two:
+            initial_to_portal_displacement = displacement_bot_to_portal_one
+            portal_to_finish_displacement = portal_two_position
+            initial_portal = portal_one_position
+        else:
+            initial_to_portal_displacement = displacement_bot_to_portal_two
+            portal_to_finish_displacement = portal_one_position
+            initial_portal = portal_two_position
+
+        displacement_to_diamond = []
+        for diamond in board.diamonds:
+            displacement_to_diamond.append((diamond.position, self.displacement(portal_to_finish_displacement, diamond.position)))
+        shortest_displacement = min(displacement_to_diamond, key=lambda x: x[1])
+        shortest_displacement_to_diamond = shortest_displacement[1]
+
+        total_displacement = shortest_displacement_to_diamond + initial_to_portal_displacement
+
+        return initial_portal, total_displacement
+    
+    def find_portal_position(self, board: Board):
+        list_portal = [x for x in board.game_objects if x.type == "TeleportGameObject"]
+        return list_portal[0].position, list_portal[1].position
 
     def next_move(self, board_bot: GameObject, board: Board):
         props = board_bot.properties
-        currentPos = board_bot.position
+        current_position = board_bot.position
+        first_portal_position, second_portal_position = self.find_portal_position(board)
+        print("Current bot position : ", current_position)
+        print("First portal position", first_portal_position)
+        print("Second portal position", second_portal_position)
+        
         print("DIAMOND = ", props.diamonds)
         if props.diamonds == 5:
             base = board_bot.properties.base
             self.goal_position = base
         else:
-            print("BOT GUA")
-            print(board_bot.position)
-            print("SEMUA BOT")
-            print(board.bots)
-            print("DIAMONDS")
+            print(board.game_objects)
             listJarak = []
             for diamond in board.diamonds:
                 print(diamond.position)
@@ -41,13 +69,29 @@ class MyBot(BaseLogic):
                     listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
             try:
                 minDiamond = min(listJarak, key = lambda x: x[1])
-                self.goal_position = minDiamond[0]
+                initial_portal_position, effective_portal_diamond_displacement = self.portal_to_diamond_displacement(current_position, first_portal_position, second_portal_position, board)
+                if (minDiamond[1] > effective_portal_diamond_displacement):
+                    self.goal_position = initial_portal_position
+                else:
+                    self.goal_position = minDiamond[0]
             except:
                 self.goal_position = base
 
+            if (self.goal_position != initial_portal_position):
+                if (self.goal_position.x == initial_portal_position.x):
+                    if (self.goal_position.y > initial_portal_position.y):
+                        return 0, 1
+                    else:
+                        return 0, -1
+                elif (self.goal_position.y == initial_portal_position.y):
+                    if (self.goal_position.x > initial_portal_position.x):
+                        return 1, 0
+                    else:
+                        return -1, 0
+                
         delta_x, delta_y = get_direction(
-            currentPos.x,
-            currentPos.y,
+            current_position.x,
+            current_position.y,
             self.goal_position.x,
             self.goal_position.y,
         )

@@ -8,14 +8,19 @@ from game.bot_handler import BotHandler
 from game.logic.random import RandomLogic
 from game.util import *
 from game.logic.base import BaseLogic
-from game.logic.mybot import MyBot
+from game.logic.shortest_distance import ShortestDistance
+from game.logic.highest_value import HighestValue
+from game.logic.highest_density import HighestDensity
+
 
 init()
 BASE_URL = "http://localhost:3000/api"
 DEFAULT_BOARD_ID = 1
 CONTROLLERS = {
     "Random": RandomLogic,
-    "MyBot" : MyBot
+    "ShortestDistance" : ShortestDistance,
+    "HighestValue" : HighestValue,
+    "HighestDensity" : HighestDensity
 }
 
 ###############################################################################

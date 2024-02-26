@@ -1,4 +1,3 @@
-import random
 from typing import Optional
 import math
 
@@ -7,7 +6,7 @@ from game.models import GameObject, Board, Position
 from ..util import get_direction, position_equals
 
 
-class MyBot(BaseLogic):
+class HighestValue(BaseLogic):
     # Fungsi Konstruktor
     def __init__(self):
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -113,23 +112,23 @@ class MyBot(BaseLogic):
             else:
                 self.goal_position = base
         else:
-            listJarak = []
+            listPoints = []
             for diamond in board.diamonds:
                 print(diamond.position)
                 print("Jarak: ")
                 print(self.displacement(board_bot.position,diamond.position))
                 if props.diamonds == 4:
                     if diamond.properties.points != 2:
-                        listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
+                        listPoints.append((diamond.position, diamond.properties.points, self.displacement(board_bot.position,diamond.position))) 
                 else:
-                    listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
+                    listPoints.append((diamond.position, diamond.properties.points, self.displacement(board_bot.position,diamond.position)))
             try:
-                minDiamond = min(listJarak, key = lambda x: x[1])
+                maxDiamond = max(listPoints, key = lambda x: x[1])
                 initial_portal_position, effective_portal_diamond_displacement = self.portal_utility_displacement("DiamondGameObject",current_position, first_portal_position, second_portal_position, board, board_bot)
-                if (minDiamond[1] > effective_portal_diamond_displacement):
+                if (maxDiamond[2] > effective_portal_diamond_displacement):
                     self.goal_position = initial_portal_position
                 else:
-                    self.goal_position = minDiamond[0]
+                    self.goal_position = maxDiamond[0]
             except:
                 initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
                 if (self.displacement(current_position,base) > effective_portal_base_displacement):
@@ -148,8 +147,8 @@ class MyBot(BaseLogic):
                         if (self.is_diamond_position(expected_position, board)):
                             return direction
                         else:
-                            minDiamond = min(listJarak, key = lambda x: x[1])
-                            self.goal_position = minDiamond[0]
+                            maxDiamond = max(listPoints, key = lambda x: x[1])
+                            self.goal_position = maxDiamond[0]
 
             # Kasus ketika waktu yang tersisa dalam permainan dibawah 10 detik
             if time_rem <= 10000:

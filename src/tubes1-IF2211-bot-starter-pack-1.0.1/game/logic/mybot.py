@@ -141,23 +141,17 @@ class MyBot(BaseLogic):
                     self.goal_position = base
             
             if (self.is_teleporter_position(current_position, board)):
-                save_direction = None
-                expected_direction = None
                 direction_available  = self.possible_direction(current_position, board)
                 print("Direction available :", direction_available)
                 
                 for direction in direction_available:
                     expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
                     if (not self.is_teleporter_position(expected_position, board)):
-                        expected_direction = direction
                         if (self.is_diamond_position(expected_position, board)):
-                            save_direction = direction
-                print("Expected direction : ", expected_direction)
-                print("Save direction: ", save_direction)
-                if (save_direction == None):
-                    return expected_direction
-                else:
-                    return save_direction
+                            return direction
+                        else:
+                            minDiamond = min(listJarak, key = lambda x: x[1])
+                            self.goal_position = minDiamond[0]
                             
 
             if time_rem <= 10000:

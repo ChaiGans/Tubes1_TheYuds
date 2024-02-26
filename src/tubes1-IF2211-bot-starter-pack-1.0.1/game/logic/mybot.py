@@ -4,7 +4,7 @@ import math
 
 from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
-from ..util import get_direction
+from ..util import get_direction, position_equals
 
 
 class MyBot(BaseLogic):
@@ -12,9 +12,41 @@ class MyBot(BaseLogic):
         self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
+        self.is_portal_entry = False
         
     def displacement(self, current_position: Position, goal_position: Position):
         return math.sqrt((current_position.x - goal_position.x) ** 2 + (current_position.y - goal_position.y) ** 2)
+    
+    def is_teleporter_position (self, current_position : Position, board: Board):
+        list_portal = [x for x in board.game_objects if x.type == "TeleportGameObject"]
+        for portal in list_portal:
+            if (position_equals(current_position, portal.position)):
+                return True
+        return False
+    
+    def is_diamond_position (self, current_position : Position, board: Board):
+        list_diamond = [x for x in board.game_objects if x.type == "DiamondGameObject"]
+        for diamond in list_diamond:
+            print("IsDiamond: Current position:", current_position)
+            print("Diamond position : ", diamond)
+            if (position_equals(current_position, diamond.position)):
+                return True
+        return False
+    
+    def possible_direction(self, current_position: Position, board: Board):
+        direction_available = []
+        
+        if current_position.x > 0:
+            direction_available.append((-1, 0))
+        if current_position.x < board.width - 1:
+            direction_available.append((1, 0))
+
+        if current_position.y > 0:
+            direction_available.append((0, -1))
+        if current_position.y < board.height - 1:
+            direction_available.append((0, 1))
+        
+        return direction_available
     
     def portal_to_diamond_displacement(self, current_position: Position, portal_one_position: Position, portal_two_position: Position, board: Board):
         displacement_bot_to_portal_one = self.displacement(current_position, portal_one_position)
@@ -57,6 +89,7 @@ class MyBot(BaseLogic):
 
         displacement_to_base = self.displacement(portal_to_finish_displacement, base_position)
         total_displacement = displacement_to_base + initial_to_portal_displacement
+        
 
         return initial_portal, total_displacement
     
@@ -106,22 +139,26 @@ class MyBot(BaseLogic):
                     self.goal_position = initial_portal_position
                 else:
                     self.goal_position = base
-
-            if (self.goal_position != initial_portal_position):
-                print("CHECK AVOIDING MOVE")
-                if (self.goal_position.x == initial_portal_position.x):
-                    if (abs(initial_portal_position.y - current_position.y) == 1):
-                        if (current_position.x == 0):
-                            return 1,0
-                        else:
-                            return -1,0
-                    
-                elif (self.goal_position.y == initial_portal_position.y):
-                    if (abs(initial_portal_position.x - current_position.x) == 1):
-                        if (current_position.y == 0):
-                            return 0,1
-                        else:
-                            return 0,-1
+            
+            if (self.is_teleporter_position(current_position, board)):
+                save_direction = None
+                expected_direction = None
+                direction_available  = self.possible_direction(current_position, board)
+                print("Direction available :", direction_available)
+                
+                for direction in direction_available:
+                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    if (not self.is_teleporter_position(expected_position, board)):
+                        expected_direction = direction
+                        if (self.is_diamond_position(expected_position, board)):
+                            save_direction = direction
+                print("Expected direction : ", expected_direction)
+                print("Save direction: ", save_direction)
+                if (save_direction == None):
+                    return expected_direction
+                else:
+                    return save_direction
+                            
 
             if time_rem <= 10000:
                 if(props.diamonds > 1):

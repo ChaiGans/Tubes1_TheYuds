@@ -52,35 +52,11 @@ class MyBot(BaseLogic):
             direction_available.append((0, 1))
         
         return direction_available
-
-    def portal_to_diamond_displacement(self, current_position: Position, portal_one_position: Position, portal_two_position: Position, board: Board):
-        displacement_bot_to_portal_one = self.displacement(current_position, portal_one_position)
-        displacement_bot_to_portal_two = self.displacement(current_position, portal_two_position)
-
-        if displacement_bot_to_portal_one <= displacement_bot_to_portal_two:
-            initial_to_portal_displacement = displacement_bot_to_portal_one
-            portal_to_finish_displacement = portal_two_position
-            initial_portal = portal_one_position
-        else:
-            initial_to_portal_displacement = displacement_bot_to_portal_two
-            portal_to_finish_displacement = portal_one_position
-            initial_portal = portal_two_position
-
-        displacement_to_diamond = []
-        for diamond in board.diamonds:
-            displacement_to_diamond.append((diamond.position, self.displacement(portal_to_finish_displacement, diamond.position)))
-        shortest_displacement = min(displacement_to_diamond, key=lambda x: x[1])
-        shortest_displacement_to_diamond = shortest_displacement[1]
-
-        total_displacement = shortest_displacement_to_diamond + initial_to_portal_displacement
-
-        return initial_portal, total_displacement
     
-    def portal_to_base_displacement(self, current_position: Position, portal_one_position: Position, portal_two_position: Position, board_bot: GameObject):
+    # Fungsi untuk memanfaatkan portal
+    def portal_utility_displacement(self, target:str, current_position: Position, portal_one_position: Position, portal_two_position: Position, board: Board, board_bot: GameObject):
         displacement_bot_to_portal_one = self.displacement(current_position, portal_one_position)
         displacement_bot_to_portal_two = self.displacement(current_position, portal_two_position)
-        base_position = board_bot.properties.base
-
 
         if displacement_bot_to_portal_one <= displacement_bot_to_portal_two:
             initial_to_portal_displacement = displacement_bot_to_portal_one
@@ -91,13 +67,22 @@ class MyBot(BaseLogic):
             portal_to_finish_displacement = portal_one_position
             initial_portal = portal_two_position
 
+        if target == "DiamondGameObject":
+            displacement_to_diamond = []
+            for diamond in board.diamonds:
+                displacement_to_diamond.append((diamond.position, self.displacement(portal_to_finish_displacement, diamond.position)))
+            shortest_displacement = min(displacement_to_diamond, key=lambda x: x[1])
+            shortest_displacement_to_diamond = shortest_displacement[1]
 
-        displacement_to_base = self.displacement(portal_to_finish_displacement, base_position)
-        total_displacement = displacement_to_base + initial_to_portal_displacement
+            total_displacement = shortest_displacement_to_diamond + initial_to_portal_displacement
+        elif target == "Base":
+            base_position = board_bot.properties.base
+            displacement_to_base = self.displacement(portal_to_finish_displacement, base_position)
+            total_displacement = displacement_to_base + initial_to_portal_displacement
         
-
+        
         return initial_portal, total_displacement
-    
+
     # Fungsi untuk mencari posisi portal yang terdapat pada papan
     def find_portal_position(self, board: Board):
         list_portal = [x for x in board.game_objects if x.type == "TeleportGameObject"]
@@ -122,7 +107,7 @@ class MyBot(BaseLogic):
 
 
         if props.diamonds == 5:
-            initial_portal_position, effective_portal_base_displacement = self.portal_to_base_displacement(current_position,first_portal_position, second_portal_position, board_bot)
+            initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
             if (self.displacement(current_position,base) > effective_portal_base_displacement):
                 self.goal_position = initial_portal_position
             else:
@@ -140,13 +125,13 @@ class MyBot(BaseLogic):
                     listJarak.append((diamond.position, self.displacement(board_bot.position,diamond.position)))
             try:
                 minDiamond = min(listJarak, key = lambda x: x[1])
-                initial_portal_position, effective_portal_diamond_displacement = self.portal_to_diamond_displacement(current_position, first_portal_position, second_portal_position, board)
+                initial_portal_position, effective_portal_diamond_displacement = self.portal_utility_displacement("DiamondGameObject",current_position, first_portal_position, second_portal_position, board, board_bot)
                 if (minDiamond[1] > effective_portal_diamond_displacement):
                     self.goal_position = initial_portal_position
                 else:
                     self.goal_position = minDiamond[0]
             except:
-                initial_portal_position, effective_portal_base_displacement = self.portal_to_base_displacement(current_position,first_portal_position, second_portal_position, board_bot)
+                initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
                 if (self.displacement(current_position,base) > effective_portal_base_displacement):
                     self.goal_position = initial_portal_position
                 else:
@@ -169,7 +154,7 @@ class MyBot(BaseLogic):
             # Kasus ketika waktu yang tersisa dalam permainan dibawah 10 detik
             if time_rem <= 10000:
                 if(props.diamonds > 1):
-                    initial_portal_position, effective_portal_base_displacement = self.portal_to_base_displacement(current_position,first_portal_position, second_portal_position, board_bot)
+                    initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
                     if (self.displacement(current_position,base) > effective_portal_base_displacement):
                         self.goal_position = initial_portal_position
                     else:

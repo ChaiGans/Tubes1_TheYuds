@@ -11,6 +11,7 @@ from game.logic.base import BaseLogic
 from game.logic.shortest_distance import ShortestDistance
 from game.logic.highest_value import HighestValue
 from game.logic.highest_density import HighestDensity
+from game.logic.highest_concentration import HighestConcentration
 
 
 init()
@@ -20,7 +21,8 @@ CONTROLLERS = {
     "Random": RandomLogic,
     "ShortestDistance" : ShortestDistance,
     "HighestValue" : HighestValue,
-    "HighestDensity" : HighestDensity
+    "HighestDensity" : HighestDensity,
+    "HighestConcentration" : HighestConcentration
 }
 
 ###############################################################################

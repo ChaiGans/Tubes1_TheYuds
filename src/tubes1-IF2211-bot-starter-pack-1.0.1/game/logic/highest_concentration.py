@@ -13,7 +13,10 @@ class HighestConcentration(BaseLogic):
         self.goal_position: Optional[Position] = None
         self.current_direction = 0
         self.is_portal_entry = False
-    
+        self.find_sector = True
+        self.target_sector = []
+        self.sector_index = 0
+
     # Fungsi untuk menghitung jarak dua titik
     def displacement(self, current_position: Position, goal_position: Position):
         return math.sqrt((current_position.x - goal_position.x) ** 2 + (current_position.y - goal_position.y) ** 2)
@@ -147,10 +150,19 @@ class HighestConcentration(BaseLogic):
 
             for i in range(4):
                 sectors[i][1] = self.countDiamond(board, sectors[i][0])
+            
+            if(not(self.find_sector)):
+                self.target_sector = sectors[self.sector_index]
+                if self.target_sector[1] < 1:
+                    self.find_sector = True
+                    
+            if (self.find_sector):
+                self.target_sector = max(sectors, key= lambda x : x[1])
+                self.sector_index = sectors.index(self.target_sector)
+                self.find_sector = False
 
-            target_sector = max(sectors, key= lambda x : x[1])
             listJarak = []
-            for diamond in target_sector[0]:
+            for diamond in self.target_sector[0]:
                 print(diamond.position)
                 print("Jarak: ")
                 print(self.displacement(board_bot.position,diamond.position))

@@ -136,6 +136,8 @@ class HighestValue(BaseLogic):
                 else:
                     self.goal_position = base
             
+            listPoints.sort(key=lambda x: x[2], reverse=True)
+            
             # Kasus ketika robot baru masuk ke dalam teleporter
             if (self.is_teleporter_position(current_position, board)):
                 direction_available  = self.possible_direction(current_position, board)

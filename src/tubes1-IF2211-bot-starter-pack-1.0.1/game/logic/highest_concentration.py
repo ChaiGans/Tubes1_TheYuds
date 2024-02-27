@@ -153,9 +153,9 @@ class HighestConcentration(BaseLogic):
             
             if(not(self.find_sector)):
                 self.target_sector = sectors[self.sector_index]
-                if self.target_sector[1] < 1:
+                if self.target_sector[1] < 3:
                     self.find_sector = True
-                    
+
             if (self.find_sector):
                 self.target_sector = max(sectors, key= lambda x : x[1])
                 self.sector_index = sectors.index(self.target_sector)
@@ -182,7 +182,6 @@ class HighestConcentration(BaseLogic):
                 # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah diamond
                 if (self.is_teleporter_position(current_position, board)):
                     print("Direction available :", direction_available)
-                    
                     for direction in direction_available:
                         expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
                         if (not self.is_teleporter_position(expected_position, board)):

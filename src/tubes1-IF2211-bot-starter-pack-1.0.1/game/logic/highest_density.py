@@ -97,14 +97,23 @@ class HighestDensity(BaseLogic):
         base = board_bot.properties.base
         time_rem = props.milliseconds_left
         direction_available  = self.possible_direction(current_position, board)
+        enemy_bot = [x for x in board.bots if not position_equals(current_position, x.position)]
 
         # Status
-        print("Current bot position : ", current_position)
-        print("First portal position : ", first_portal_position)
-        print("Second portal position : ", second_portal_position)
-        print("Base : ", base)
-        print("DIAMOND : ", props.diamonds)
+        # print("Current bot position : ", current_position)
+        # print("First portal position : ", first_portal_position)
+        # print("Second portal position : ", second_portal_position)
+        # print("Base : ", base)
+        # print("DIAMOND : ", props.diamonds)
+        # print("Enemy location :", board.bots)
 
+        # Collision strategy
+        for enemy in enemy_bot:
+            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3):
+                if (abs(current_position.x - enemy.position.x) == 1 and current_position.y == enemy.position.y):
+                    return [enemy.position.x - current_position.x, 0]
+                elif (abs(current_position.y  - enemy.position.y) == 1 and current_position.x == enemy.position.x):
+                    return [0, enemy.position.y - current_position.y]
 
         if props.diamonds == 5:
             initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
@@ -117,7 +126,7 @@ class HighestDensity(BaseLogic):
                 print("Direction available :", direction_available)
                 
                 for direction in direction_available:
-                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                     if (not self.is_teleporter_position(expected_position, board)):        
                         self.goal_position = base
 
@@ -145,7 +154,7 @@ class HighestDensity(BaseLogic):
                     print("Direction available :", direction_available)
                     
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):
                             if (self.is_diamond_position(expected_position, board)):
                                 return direction
@@ -164,7 +173,7 @@ class HighestDensity(BaseLogic):
                     print("Direction available :", direction_available)
                     
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):        
                             self.goal_position = base
 

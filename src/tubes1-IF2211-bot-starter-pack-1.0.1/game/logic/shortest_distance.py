@@ -118,7 +118,7 @@ class ShortestDistance(BaseLogic):
                 print("Direction available :", direction_available)
                 
                 for direction in direction_available:
-                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                     if (not self.is_teleporter_position(expected_position, board)):        
                         self.goal_position = base
         else:
@@ -145,7 +145,7 @@ class ShortestDistance(BaseLogic):
                     print("Direction available :", direction_available)
                     
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):
                             if (self.is_diamond_position(expected_position, board)):
                                 return direction
@@ -164,7 +164,7 @@ class ShortestDistance(BaseLogic):
                     print("Direction available :", direction_available)
                     
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):        
                             self.goal_position = base
 

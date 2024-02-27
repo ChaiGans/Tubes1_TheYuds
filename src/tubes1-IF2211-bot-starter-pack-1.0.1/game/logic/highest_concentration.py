@@ -33,8 +33,8 @@ class HighestConcentration(BaseLogic):
     def is_diamond_position (self, current_position : Position, board: Board):
         list_diamond = [x for x in board.game_objects if x.type == "DiamondGameObject"]
         for diamond in list_diamond:
-            print("IsDiamond: Current position:", current_position)
-            print("Diamond position : ", diamond)
+            # print("IsDiamond: Current position:", current_position)
+            # print("Diamond position : ", diamond)
             if (position_equals(current_position, diamond.position)):
                 return True
         return False
@@ -116,14 +116,14 @@ class HighestConcentration(BaseLogic):
         base = board_bot.properties.base
         time_rem = props.milliseconds_left
         direction_available  = self.possible_direction(current_position, board)
-
+            
         # Status
-        print("Current bot position : ", current_position)
-        print("First portal position : ", first_portal_position)
-        print("Second portal position : ", second_portal_position)
-        print("Base : ", base)
-        print("DIAMOND : ", props.diamonds)
-
+        # print("Current bot position : ", current_position)
+        # print("First portal position : ", first_portal_position)
+        # print("Second portal position : ", second_portal_position)
+        # print("Base : ", base)
+        # print("DIAMOND : ", props.diamonds)
+        # print("Enemy bot :", board.bots)
 
         if props.diamonds == 5:
             initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
@@ -137,7 +137,7 @@ class HighestConcentration(BaseLogic):
                 print("Direction available :", direction_available)
                 
                 for direction in direction_available:
-                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                     if (not self.is_teleporter_position(expected_position, board)):        
                         self.goal_position = base
         else:
@@ -151,11 +151,13 @@ class HighestConcentration(BaseLogic):
             for i in range(4):
                 sectors[i][1] = self.countDiamond(board, sectors[i][0])
             
+            # Jika sektor yang dituju sudah ditemukan
             if(not(self.find_sector)):
                 self.target_sector = sectors[self.sector_index]
                 if self.target_sector[1] < 3:
                     self.find_sector = True
 
+            # Jika ingi mencari sektor yang dituju
             if (self.find_sector):
                 self.target_sector = max(sectors, key= lambda x : x[1])
                 self.sector_index = sectors.index(self.target_sector)
@@ -183,13 +185,14 @@ class HighestConcentration(BaseLogic):
                 if (self.is_teleporter_position(current_position, board)):
                     print("Direction available :", direction_available)
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):
                             if (self.is_diamond_position(expected_position, board)):
                                 return direction
                             else:
                                 minDiamond = min(listJarak, key = lambda x: x[1])
                                 self.goal_position = minDiamond[0]
+                                print("GOAL POSITION AFTER TELEPORT:", self.goal_position)
             except:
                 initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
                 if (self.displacement(current_position,base) > effective_portal_base_displacement):
@@ -202,7 +205,7 @@ class HighestConcentration(BaseLogic):
                     print("Direction available :", direction_available)
                     
                     for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):        
                             self.goal_position = base
 

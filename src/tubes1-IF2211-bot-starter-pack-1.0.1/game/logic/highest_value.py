@@ -159,14 +159,16 @@ class HighestValue(BaseLogic):
                 else:
                     self.goal_position = base
 
+            listPoints.sort(key=lambda x: x[2], reverse=True)
+            
             # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah base 
-                if (self.is_teleporter_position(current_position, board)):
-                    print("Direction available :", direction_available)
-                    
-                    for direction in direction_available:
-                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
-                        if (not self.is_teleporter_position(expected_position, board)):        
-                            self.goal_position = base
+            if (self.is_teleporter_position(current_position, board)):
+                print("Direction available :", direction_available)
+                
+                for direction in direction_available:
+                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    if (not self.is_teleporter_position(expected_position, board)):        
+                        self.goal_position = base
 
             # Kasus ketika waktu yang tersisa dalam permainan dibawah 10 detik
             if time_rem <= 10000:

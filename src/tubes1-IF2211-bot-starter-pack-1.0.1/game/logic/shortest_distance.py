@@ -96,6 +96,7 @@ class ShortestDistance(BaseLogic):
         first_portal_position, second_portal_position = self.find_portal_position(board)
         base = board_bot.properties.base
         time_rem = props.milliseconds_left
+        direction_available  = self.possible_direction(current_position, board)
 
         # Status
         print("Current bot position : ", current_position)
@@ -111,6 +112,15 @@ class ShortestDistance(BaseLogic):
                 self.goal_position = initial_portal_position
             else:
                 self.goal_position = base
+
+            # Kasus ketika robot baru masuk ke dalam teleporter dan inventory == 5
+            if (self.is_teleporter_position(current_position, board)):
+                print("Direction available :", direction_available)
+                
+                for direction in direction_available:
+                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                    if (not self.is_teleporter_position(expected_position, board)):        
+                        self.goal_position = base
         else:
             listJarak = []
             for diamond in board.diamonds:
@@ -129,6 +139,19 @@ class ShortestDistance(BaseLogic):
                     self.goal_position = initial_portal_position
                 else:
                     self.goal_position = minDiamond[0]
+
+                # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah diamond
+                if (self.is_teleporter_position(current_position, board)):
+                    print("Direction available :", direction_available)
+                    
+                    for direction in direction_available:
+                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        if (not self.is_teleporter_position(expected_position, board)):
+                            if (self.is_diamond_position(expected_position, board)):
+                                return direction
+                            else:
+                                minDiamond = min(listJarak, key = lambda x: x[1])
+                                self.goal_position = minDiamond[0]
             except:
                 initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
                 if (self.displacement(current_position,base) > effective_portal_base_displacement):
@@ -136,19 +159,14 @@ class ShortestDistance(BaseLogic):
                 else:
                     self.goal_position = base
             
-            # Kasus ketika robot baru masuk ke dalam teleporter
-            if (self.is_teleporter_position(current_position, board)):
-                direction_available  = self.possible_direction(current_position, board)
-                print("Direction available :", direction_available)
-                
-                for direction in direction_available:
-                    expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
-                    if (not self.is_teleporter_position(expected_position, board)):
-                        if (self.is_diamond_position(expected_position, board)):
-                            return direction
-                        else:
-                            minDiamond = min(listJarak, key = lambda x: x[1])
-                            self.goal_position = minDiamond[0]
+                # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah base 
+                if (self.is_teleporter_position(current_position, board)):
+                    print("Direction available :", direction_available)
+                    
+                    for direction in direction_available:
+                        expected_position = Position(current_position.x+direction[0], current_position.y+direction[1])
+                        if (not self.is_teleporter_position(expected_position, board)):        
+                            self.goal_position = base
 
             # Kasus ketika waktu yang tersisa dalam permainan dibawah 10 detik
             if time_rem <= 10000:

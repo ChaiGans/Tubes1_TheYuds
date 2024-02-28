@@ -91,13 +91,15 @@ class HighestConcentration(BaseLogic):
         return list_portal[0].position, list_portal[1].position
 
     # Prosedur untuk mempartisi map dari koordinat i hingga j
-    def partitionMap(self, board: Board, start_x: int, start_y:int, end_x: int, end_y:int, list: List[GameObject]):
+    def partitionMap(self, current_position:Position, board: Board, start_x: int, start_y:int, end_x: int, end_y:int, list: List[GameObject]):
         list_diamond = [x for x in board.game_objects if x.type == "DiamondGameObject"]
         for y in range(start_y, end_y):
             for x in range(start_x, end_x):
                 for diamond in list_diamond:
                     if position_equals(Position(y,x), diamond.position):
                         list.append(diamond)
+        min_pos = min(list_diamond, key = lambda x: self.displacement(current_position,x.position))
+        return min_pos.position
 
     # Fungsi untuk menghitung jumlah poin diamond pada partisi
     def countDiamond(self, board: Board, section: List[GameObject]) -> int:
@@ -141,11 +143,11 @@ class HighestConcentration(BaseLogic):
                     if (not self.is_teleporter_position(expected_position, board)):        
                         self.goal_position = base
         else:
-            sectors = [[[],0] for i in range(4)]
+            sectors = [[[],0, Position(0,0)] for i in range(4)]
             idx = 0
             for i in range(2):
                 for j in range(2):
-                    self.partitionMap(board, (j * board.width)//2, (i* board.height)//2, ((j+1)* board.width)//2 , ((i+1)*board.height)//2, sectors[idx][0])
+                    sectors[idx][2] = self.partitionMap(current_position, board, (j * board.width)//2, (i* board.height)//2, ((j+1)* board.width)//2 , ((i+1)*board.height)//2, sectors[idx][0])
                     idx += 1
 
             for i in range(4):
@@ -159,7 +161,7 @@ class HighestConcentration(BaseLogic):
 
             # Jika ingi mencari sektor yang dituju
             if (self.find_sector):
-                self.target_sector = max(sectors, key= lambda x : x[1])
+                self.target_sector = max(sectors, key= lambda x : x[1]/self.displacement(current_position,x[2]))
                 self.sector_index = sectors.index(self.target_sector)
                 self.find_sector = False
 

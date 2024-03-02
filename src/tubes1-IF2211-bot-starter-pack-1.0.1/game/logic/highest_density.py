@@ -30,6 +30,8 @@ class HighestDensity(BaseLogic):
     def is_diamond_position (self, current_position : Position, board: Board):
         list_diamond = [x for x in board.game_objects if x.type == "DiamondGameObject"]
         for diamond in list_diamond:
+            print("IsDiamond: Current position:", current_position)
+            print("Diamond position : ", diamond)
             if (position_equals(current_position, diamond.position)):
                 return True
         return False
@@ -84,14 +86,6 @@ class HighestDensity(BaseLogic):
     def find_portal_position(self, board: Board):
         list_portal = [x for x in board.game_objects if x.type == "TeleportGameObject"]
         return list_portal[0].position, list_portal[1].position
-    
-    # Fungsi untuk menghitung banyak diamond di sekitar base
-    def count_diamond_near_base(self, board: Board, board_bot: GameObject):
-        count = 0
-        for diamond in board.diamonds:
-            if (self.displacement(diamond.position, board_bot.properties.base) < 6):
-                count += diamond.properties.points
-        return count
 
     # Fungsi untuk menentukan langkah selanjutnya yang akan dilalui robot
     def next_move(self, board_bot: GameObject, board: Board):
@@ -104,16 +98,23 @@ class HighestDensity(BaseLogic):
         time_rem = props.milliseconds_left
         direction_available  = self.possible_direction(current_position, board)
         enemy_bot = [x for x in board.bots if not position_equals(current_position, x.position)]
-        diamond_near_base = self.count_diamond_near_base(board, board_bot)
+
+        # Status
+        # print("Current bot position : ", current_position)
+        # print("First portal position : ", first_portal_position)
+        # print("Second portal position : ", second_portal_position)
+        # print("Base : ", base)
+        # print("DIAMOND : ", props.diamonds)
+        # print("Enemy location :", board.bots)
 
         # Collision strategy
         for enemy in enemy_bot:
-            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3 and (board_bot.properties.milliseconds_left%1 > enemy.properties.milliseconds_left%1)):
+            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3):
                 if (abs(current_position.x - enemy.position.x) == 1 and current_position.y == enemy.position.y):
                     return [enemy.position.x - current_position.x, 0]
                 elif (abs(current_position.y  - enemy.position.y) == 1 and current_position.x == enemy.position.x):
                     return [0, enemy.position.y - current_position.y]
-                
+
         if props.diamonds == 5:
             initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
             if (self.displacement(current_position,base) > effective_portal_base_displacement):
@@ -122,6 +123,7 @@ class HighestDensity(BaseLogic):
                 self.goal_position = base
             # Kasus ketika robot baru masuk ke dalam teleporter dan inventory == 5
             if (self.is_teleporter_position(current_position, board)):
+                print("Direction available :", direction_available)
                 
                 for direction in direction_available:
                     expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
@@ -131,6 +133,9 @@ class HighestDensity(BaseLogic):
         else:
             listRatio = []
             for diamond in board.diamonds:
+                print(diamond.position)
+                print("Jarak: ")
+                print(self.displacement(board_bot.position,diamond.position))
                 if props.diamonds == 4:
                     if diamond.properties.points != 2:
                         listRatio.append((diamond.position, diamond.properties.points/self.displacement(board_bot.position,diamond.position), self.displacement(board_bot.position,diamond.position))) 
@@ -138,23 +143,16 @@ class HighestDensity(BaseLogic):
                     listRatio.append((diamond.position, diamond.properties.points/self.displacement(board_bot.position,diamond.position), self.displacement(board_bot.position,diamond.position)))
             try:
                 maxDiamond = max(listRatio, key = lambda x: x[1])
-                print(listRatio)
                 initial_portal_position, effective_portal_diamond_displacement = self.portal_utility_displacement("DiamondGameObject",current_position, first_portal_position, second_portal_position, board, board_bot)
-                initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
-
-                if (diamond_near_base > 5 and self.displacement(current_position, base) > 8):
-                    if (self.displacement(current_position, base) > effective_portal_base_displacement):
-                        self.goal_position = initial_portal_position
-                    else:
-                        self.goal_position = base
+                if (maxDiamond[2] > effective_portal_diamond_displacement):
+                    self.goal_position = initial_portal_position
                 else:
-                    if (maxDiamond[2] > effective_portal_diamond_displacement):
-                        self.goal_position = initial_portal_position
-                    else:
-                        self.goal_position = maxDiamond[0]
+                    self.goal_position = maxDiamond[0]
                 
                 # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah diamond
                 if (self.is_teleporter_position(current_position, board)):
+                    print("Direction available :", direction_available)
+                    
                     for direction in direction_available:
                         expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
                         if (not self.is_teleporter_position(expected_position, board)):
@@ -172,6 +170,7 @@ class HighestDensity(BaseLogic):
             
                 # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah base 
                 if (self.is_teleporter_position(current_position, board)):
+                    print("Direction available :", direction_available)
                     
                     for direction in direction_available:
                         expected_position = Position(current_position.y+direction[1], current_position.x+direction[0])
@@ -194,4 +193,7 @@ class HighestDensity(BaseLogic):
             self.goal_position.x,
             self.goal_position.y,
         )
+        print(current_position)
+        print(self.goal_position)
+        print(delta_x, delta_y)
         return delta_x, delta_y

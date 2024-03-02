@@ -109,7 +109,7 @@ class HighestDensity(BaseLogic):
 
         # Collision strategy
         for enemy in enemy_bot:
-            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3):
+            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3 and props.milliseconds_left%1000<enemy.properties.milliseconds_left%1000):
                 if (abs(current_position.x - enemy.position.x) == 1 and current_position.y == enemy.position.y):
                     return [enemy.position.x - current_position.x, 0]
                 elif (abs(current_position.y  - enemy.position.y) == 1 and current_position.x == enemy.position.x):

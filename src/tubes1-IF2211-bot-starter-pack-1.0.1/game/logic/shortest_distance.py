@@ -97,6 +97,7 @@ class ShortestDistance(BaseLogic):
         base = board_bot.properties.base
         time_rem = props.milliseconds_left
         direction_available  = self.possible_direction(current_position, board)
+        enemy_bot = [x for x in board.bots if not position_equals(current_position, x.position)]
 
         # Status
         print("Current bot position : ", current_position)
@@ -105,6 +106,13 @@ class ShortestDistance(BaseLogic):
         print("Base : ", base)
         print("DIAMOND : ", props.diamonds)
 
+        # Collision strategy
+        for enemy in enemy_bot:
+            if (enemy.properties.diamonds > board_bot.properties.diamonds and board_bot.properties.diamonds < 3 and props.milliseconds_left%1000<enemy.properties.milliseconds_left%1000):
+                if (abs(current_position.x - enemy.position.x) == 1 and current_position.y == enemy.position.y):
+                    return [enemy.position.x - current_position.x, 0]
+                elif (abs(current_position.y  - enemy.position.y) == 1 and current_position.x == enemy.position.x):
+                    return [0, enemy.position.y - current_position.y]
 
         if props.diamonds == 5:
             initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)

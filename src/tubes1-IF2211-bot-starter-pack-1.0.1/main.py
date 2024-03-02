@@ -12,6 +12,7 @@ from game.logic.shortest_distance import ShortestDistance
 from game.logic.highest_value import HighestValue
 from game.logic.highest_density import HighestDensity
 from game.logic.highest_concentration import HighestConcentration
+from game.logic.nearest_base import NearestBase
 
 
 init()
@@ -22,7 +23,8 @@ CONTROLLERS = {
     "ShortestDistance" : ShortestDistance,
     "HighestValue" : HighestValue,
     "HighestDensity" : HighestDensity,
-    "HighestConcentration" : HighestConcentration
+    "HighestConcentration" : HighestConcentration,
+    "NearestBase": NearestBase,
 }
 
 ###############################################################################
@@ -212,7 +214,7 @@ while True:
 
     # Don't spam the board more than it allows!
     # sleep(move_delay * time_factor)
-    sleep(1)
+    sleep(0.3)
 
 
 ###############################################################################

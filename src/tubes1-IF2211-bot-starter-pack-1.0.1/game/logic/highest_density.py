@@ -1,6 +1,6 @@
 from typing import Optional
 import math
-
+import random
 from game.logic.base import BaseLogic
 from game.models import GameObject, Board, Position
 from ..util import get_direction, position_equals
@@ -138,7 +138,6 @@ class HighestDensity(BaseLogic):
                     listRatio.append((diamond.position, diamond.properties.points/self.displacement(board_bot.position,diamond.position), self.displacement(board_bot.position,diamond.position)))
             try:
                 maxDiamond = max(listRatio, key = lambda x: x[1])
-                print(listRatio)
                 initial_portal_position, effective_portal_diamond_displacement = self.portal_utility_displacement("DiamondGameObject",current_position, first_portal_position, second_portal_position, board, board_bot)
                 initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
 
@@ -194,4 +193,7 @@ class HighestDensity(BaseLogic):
             self.goal_position.x,
             self.goal_position.y,
         )
+
+        if (delta_x == 0 and delta_y == 0):
+            delta_x, delta_y = direction_available[random.randrange(0,len(direction_available))]
         return delta_x, delta_y

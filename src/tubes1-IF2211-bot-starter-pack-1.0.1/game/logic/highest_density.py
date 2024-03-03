@@ -85,13 +85,6 @@ class HighestDensity(BaseLogic):
         list_portal = [x for x in board.game_objects if x.type == "TeleportGameObject"]
         return list_portal[0].position, list_portal[1].position
     
-    # Fungsi untuk menghitung banyak diamond di sekitar base
-    def count_diamond_near_base(self, board: Board, board_bot: GameObject):
-        count = 0
-        for diamond in board.diamonds:
-            if (self.displacement(diamond.position, board_bot.properties.base) < 6):
-                count += diamond.properties.points
-        return count
 
     # Fungsi untuk menentukan langkah selanjutnya yang akan dilalui robot
     def next_move(self, board_bot: GameObject, board: Board):
@@ -104,7 +97,6 @@ class HighestDensity(BaseLogic):
         time_rem = props.milliseconds_left
         direction_available  = self.possible_direction(current_position, board)
         enemy_bot = [x for x in board.bots if not position_equals(current_position, x.position)]
-        diamond_near_base = self.count_diamond_near_base(board, board_bot)
 
         # Collision strategy
         for enemy in enemy_bot:
@@ -139,18 +131,11 @@ class HighestDensity(BaseLogic):
             try:
                 maxDiamond = max(listRatio, key = lambda x: x[1])
                 initial_portal_position, effective_portal_diamond_displacement = self.portal_utility_displacement("DiamondGameObject",current_position, first_portal_position, second_portal_position, board, board_bot)
-                initial_portal_position, effective_portal_base_displacement = self.portal_utility_displacement("Base", current_position,first_portal_position, second_portal_position, board, board_bot)
 
-                if (diamond_near_base > 5 and self.displacement(current_position, base) > 8):
-                    if (self.displacement(current_position, base) > effective_portal_base_displacement):
-                        self.goal_position = initial_portal_position
-                    else:
-                        self.goal_position = base
+                if (maxDiamond[2] > effective_portal_diamond_displacement):
+                    self.goal_position = initial_portal_position
                 else:
-                    if (maxDiamond[2] > effective_portal_diamond_displacement):
-                        self.goal_position = initial_portal_position
-                    else:
-                        self.goal_position = maxDiamond[0]
+                    self.goal_position = maxDiamond[0]
                 
                 # Kasus ketika robot baru masuk ke dalam teleporter dan inventory < 5 dan target robot adalah diamond
                 if (self.is_teleporter_position(current_position, board)):

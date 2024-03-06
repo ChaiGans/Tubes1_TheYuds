@@ -30,6 +30,7 @@ Repositori ini berisi implementasi algoritma ***greedy by highest density*** dal
         ```
 
 2. **Bot Starter Pack**
+
     Requirement yang harus di-install
     - Python (https://www.python.org/downloads/) 
 
